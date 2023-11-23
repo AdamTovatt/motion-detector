@@ -1,14 +1,17 @@
 from html_helper import HtmlHelper
+from network_credentials import NetworkCredentials
 from url_decoder import unquote
 import network
 import network
 import socket
+import time
 
 class HttpAccessPoint:
     def __init__(self, ssid, password):
         self.accessPoint = network.WLAN(network.AP_IF)
         self.accessPoint.config(essid=ssid, password=password)
         self.configPageHtml = HtmlHelper.getConfigPage()
+        self.submittedPageHtml = HtmlHelper.getSubmittedPage()
         
     def start(self):
         print("starting")
@@ -28,10 +31,11 @@ class HttpAccessPoint:
         self.accessPoint.active(False)
 
     def parseUrlInput(self, urlInput):
-        print(urlInput)
-        if "ssid" in urlInput:
-            pass
+        if "ssid" in urlInput and "password" in urlInput:
+            print("VALID INPUT")
+            return NetworkCredentials.fromQueryParameters(urlInput)
         else:
+            print("INVALID INPUT")
             return None
 
     def getNetworkCredentials(self):
@@ -47,13 +51,16 @@ class HttpAccessPoint:
                 
                 url = requestParts[1]
                 
+                if(len(url) > 1):
+                    result = self.parseUrlInput(unquote(url))
+                    if result is not None and len(result.password) > 0:
+                        connection.send(self.submittedPageHtml)
+                        time.sleep(1)
+                        return result
+                
                 connection.send(self.configPageHtml)
                 connection.close()
                 
-                if(len(url) > 1):
-                    result = self.parseUrlInput(unquote(url))
-                    if result is not None:
-                        return result
         except OSError as e:
             print(f" >> ERROR: {e}")
         finally:

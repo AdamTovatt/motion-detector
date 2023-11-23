@@ -15,14 +15,14 @@ def unquote(string):
     # Note: strings are encoded as UTF-8. This is only an issue if it contains
     # unescaped non-ASCII characters, which URIs should not.
     if not string:
-        return b''
+        return ""
 
     if isinstance(string, str):
         string = string.encode('utf-8')
 
     bits = string.split(b'%')
     if len(bits) == 1:
-        return string
+        return string.decode('utf-8')
 
     res = [bits[0]]
     append = res.append
@@ -44,4 +44,4 @@ def unquote(string):
             append(b'%')
             append(item)
 
-    return b''.join(res).decode('utf-8')
+    return (b''.join(res)).decode('utf-8')
