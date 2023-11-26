@@ -4,6 +4,7 @@ from wifi_helper import WifiHelper
 from api_helper import ApiHelper
 from on_board_led import OnBoardLed
 from http_access_point import HttpAccessPoint
+from motion_detector import MotionDetector
 import time
 import network
 import lowpower
@@ -13,9 +14,9 @@ SENSOR_PIN = 20
 led = OnBoardLed()
 led.off()
 
-try:
-    pir = Pin(20, Pin.IN, Pin.PULL_DOWN)
+led.blinkAlert(1)
 
+try:
     credentials = NetworkCredentials.load()
     
     if credentials is None:
@@ -56,33 +57,23 @@ try:
     if not api.hasCredentials:
         api.createDetector()
     
-    wifi.disconnect()
-    
-    print("Ready and waiting for motion")
-
+    motionDetector = MotionDetector(SENSOR_PIN)
+ 
     while True:
-        if pir.value() == 0:
-            print("waiting")
-        else:
-            print("motion")
-        time.sleep(1)
+        motionDetector.waitForMotion(motion_interval = 120) # will not return more often than 120 seconds
+        print("Going to register motion")
+        api.registerMotion()
+        print("Did register motion")
 
     #while True:
     #    print("Going to dormant mode")
     #    lowpower.dormant_until_pin(SENSOR_PIN)
     #    print("Woke up")
     #    api.registerMotion()
-
-    while True:
-        if pir.value() == 1:
-            led.on()
-        else:
-            led.off()
-        time.sleep(0.1)
         
 except Exception as exception:
     print(f"An error occurred: {exception}")
-    raise
-    led.blinkError()
+    led.blinkError(4)
+    machine.reset()
 
 led.off()

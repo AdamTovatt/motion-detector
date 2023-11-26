@@ -14,12 +14,19 @@ class OnBoardLed:
         # Turn the LED off
         self.led.off()
 
-    def blinkError(self):
-        while(True):
-            self.on()  # Initial state is on
-            time.sleep(1)  # Stay on for 1 second
-            self.off()  # Turn off
-            time.sleep(0.5)  # Stay off for 0.5 seconds
+    def blinkError(self, times = None):
+        if times is None:
+            while(True):
+                self.on()  # Initial state is on
+                time.sleep(1)  # Stay on for 1 second
+                self.off()  # Turn off
+                time.sleep(0.5)  # Stay off for 0.5 seconds
+        else:
+            for _ in range(times):
+                self.on()  # Initial state is on
+                time.sleep(1)  # Stay on for 1 second
+                self.off()  # Turn off
+                time.sleep(0.5)  # Stay off for 0.5 seconds
 
     def blinkSuccess(self, times):
         for _ in range(times):

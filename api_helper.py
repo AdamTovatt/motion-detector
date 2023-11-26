@@ -80,3 +80,4 @@ class ApiHelper:
             print("Motion registered successfully.")
         except Exception as e:
             print(f"Error registering motion: {e}")
+            machine.reset()
