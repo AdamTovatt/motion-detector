@@ -34,7 +34,7 @@ class OnBoardLed:
             
     def blinkAlert(self, times):
         for _ in range(times):
-            # Function to blink the LED in a success pattern
+            # Function to blink the LED in an alert pattern
             for _ in range(4):
                 self.on()  # Turn the LED on
                 time.sleep(0.2)  # Stay on for 0.1 seconds

@@ -49,7 +49,7 @@ class NetworkCredentials:
     @staticmethod
     def load():
         try:
-            with open("credentials.txt", "r") as file:
+            with open("network_credentials.txt", "r") as file:
                 data = ujson.load(file)
                 return NetworkCredentials(
                     ssid=data["ssid"],
@@ -65,13 +65,13 @@ class NetworkCredentials:
             "password": self._password,
             "username": self._username
         }
-        with open("credentials.txt", "w") as file:
+        with open("network_credentials.txt", "w") as file:
             ujson.dump(data, file)
     
     @staticmethod
     def remove():
         try:
-            os.remove("credentials.txt")
+            os.remove("network_credentials.txt")
         except OSError:
             pass
     

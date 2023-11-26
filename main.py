@@ -1,9 +1,14 @@
 from machine import Pin
 from network_credentials import NetworkCredentials
+from wifi_helper import WifiHelper
+from api_helper import ApiHelper
 from on_board_led import OnBoardLed
 from http_access_point import HttpAccessPoint
 import time
 import network
+import lowpower
+
+SENSOR_PIN = 20
 
 led = OnBoardLed()
 led.off()
@@ -28,26 +33,45 @@ try:
         print("Got credentials from access point")
         print(credentials)
         credentials.save()
+
+    wifi = WifiHelper()
+    connectionResult = wifi.connect(credentials, 10)
+
+    if connectionResult < 0:
+        led.blinkAlert(3)
+        NetworkCredentials.remove()
+        machine.reset()
+        
+    if connectionResult == 0:
+        led.blinkAlert(2)
+        machine.reset()
     
-    print("Have credentials now: ")
-    print(credentials)
+    if connectionResult == 3 or connectionResult == 2:
+        led.blinkSuccess(2)
 
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
-    wlan.connect(credentials.ssid, credentials.password)
+    # we should now be connected to the wifi
+    
+    api = ApiHelper()
+    
+    if not api.hasCredentials:
+        api.createDetector()
+    
+    wifi.disconnect()
+    
+    print("Ready and waiting for motion")
 
-    max_wait = 10
-    while max_wait > 0:
-        if wlan.status() != 1:
-            print("Connection event: ")
-            print(wlan.status())
-            if wlan.status() < 0:
-                print("removing credentials")
-                NetworkCredentials.remove()
-            break
-        max_wait -= 1
-        print("waiting for connection...")
-        time.sleep(1)         
+    while True:
+        if pir.value() == 0:
+            print("waiting")
+        else:
+            print("motion")
+        time.sleep(1)
+
+    #while True:
+    #    print("Going to dormant mode")
+    #    lowpower.dormant_until_pin(SENSOR_PIN)
+    #    print("Woke up")
+    #    api.registerMotion()
 
     while True:
         if pir.value() == 1:
@@ -55,8 +79,10 @@ try:
         else:
             led.off()
         time.sleep(0.1)
+        
 except Exception as exception:
     print(f"An error occurred: {exception}")
+    raise
     led.blinkError()
 
 led.off()
