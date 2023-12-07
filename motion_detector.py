@@ -9,8 +9,8 @@ class MotionDetector:
 
     def waitForMotion(self, motion_interval=None):
         while True:
+            time.sleep(1)
             if self.pin.value() == 0:
-                time.sleep(0.5)
             else:
                 current_time = time.time()
                 # Check if enough time has passed since the last motion
